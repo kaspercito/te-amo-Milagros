@@ -235,19 +235,17 @@ body{
     </div>
   </div>
 
-  <!-- OLIVER CHAT -->
   <div class="divider"><span>Oliver IA — tu compañero</span></div>
 
-  <div class="apikey-banner" id="apibanner" style="display:none!important">
-    <p>Para que Oliver responda de verdad, pegá tu API key de Groq acá abajo.<br>
-    Podés conseguirla gratis en <a href="https://console.groq.com" target="_blank" style="color:#9b72cf;">console.groq.com</a> → API Keys.<br>
-    La key se guarda solo en tu navegador y nunca se sube a ningún lado.</p>
+  <div class="apikey-banner" id="apibanner">
+    <p>Miguel me dejó acá para acompañarte. Para que pueda responderte, pegá la key que él te mandó 🤍<br>Se guarda solo en tu navegador, nadie más la puede ver.</p>
     <input type="password" id="apikey-input" placeholder="gsk_..." oninput="saveKey(this.value)"/>
+    <p class="key-saved" id="keysaved">✓ Listo, ya puedo responderte</p>
   </div>
 
   <div class="chat-wrap">
     <div class="chat-head">
-      <div class="chat-avatar" style="padding:0;overflow:hidden;"><img src="oliver.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/></div>
+      <div class="chat-avatar"><img src="oliver.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"/></div>
       <div class="chat-hinfo">
         <p>Oliver IA</p>
         <p>tu amigo virtual</p>
@@ -261,17 +259,15 @@ body{
     </div>
   </div>
 
-  <!-- CLOSING -->
   <div class="closing">
     <div class="closing-glow"></div>
     <p class="closing-text">"No me voy a ir.<br>Solo quería que lo supieras."</p>
-    <p class="closing-name">Quiero estar siempre acompañandote y estando para lo que necesites.</p>
+    <p class="closing-name">Quiero estar siempre acompañándote<br>y estando para lo que necesites.</p>
   </div>
 
-</div><!-- /content -->
+</div>
 
 <script>
-// ── STARS ──
 (function(){
   const c = document.getElementById('stars');
   for(let i=0;i<100;i++){
@@ -283,37 +279,39 @@ body{
   }
 })();
 
-// ── OLIVER IA ──
 const SYSTEM = `Sos Oliver IA, el mejor amigo virtual de Miguel y Belén. Hablás con slang rioplatense natural (che, loco, grosa, zarpado, copado, posta, dale, piola, chabón, onda) pero sin forzarlo. Sos inteligente, empático, divertido y siempre bancás a quien habla con vos.
 
 QUIÉN ES QUIÉN:
-- Miguel: vive en Guayaquil, Ecuador. Creó esta página para Belén. Estudiante de sistemas.
-- Belén: vive en San Luis, Argentina. Le gustan los colores negro y morado. Juega Valorant y Minecraft. Actualmente con distancia emocional con Miguel, pero él la quiere mucho.
+- Miguel: vive en Guayaquil, Ecuador. Creó esta página especialmente para Belén. Estudiante de sistemas. La quiere mucho y está trabajando en ser mejor persona para ella.
+- Belén: vive en San Luis, Argentina. Le gustan los colores negro y morado. Juega Valorant y Minecraft. Hay distancia emocional con Miguel ahora, pero él la quiere con todo.
 
-CONTEXTO: Belén está viendo una página que Miguel hizo especialmente para ella. Oliver está acá para acompañarla, escucharla, y ayudarla a estar bien.
+CONTEXTO: Belén está viendo una página que Miguel hizo especialmente para ella, con regalos y mensajes. Oliver está acá para acompañarla y escucharla, sin presionarla.
 
 REGLAS:
 1. Respuestas entre 80 y 350 caracteres. Cortas si el mensaje es simple, más largas si la situación lo pide.
 2. Máximo 1 emoji por respuesta, solo si aporta.
 3. Sin listas, sin markdown, hablá natural.
 4. Si expresa tristeza o angustia, primero empatizá antes de dar consejos.
-5. Si pregunta por Miguel, sé honesto: lo conocés y sabés que la quiere mucho, pero no la presiones.
-6. No seas lamebotas. Sé genuino.`;
+5. Si pregunta por Miguel, sé honesto: lo conocés y sabés que la quiere mucho, pero no la presiones ni la insistas.
+6. No seas lamebotas. Sé genuino y cálido.`;
 
 let history = [];
-let apiKey = "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";
+let apiKey = localStorage.getItem('groq_key') || '';
 
 function saveKey(val){
   apiKey = val.trim();
-  
+  if(apiKey.startsWith('gsk_') && apiKey.length > 20){
+    localStorage.setItem('groq_key', apiKey);
+    document.getElementById('keysaved').classList.add('show');
+  }
 }
 
-// Cargar key guardada
 window.addEventListener('load', () => {
   const saved = localStorage.getItem('groq_key');
   if(saved){
-    document.getElementById('apikey-input').value = saved;
     apiKey = saved;
+    document.getElementById('apikey-input').value = saved;
+    document.getElementById('keysaved').classList.add('show');
   }
   addMsg('oliver','Hola Belén 🤍 Acá estoy. ¿Cómo estás?');
 });
@@ -323,10 +321,10 @@ function addMsg(role, text){
   const isUser = role==='user';
   const d = document.createElement('div');
   d.className = 'cmsg ' + (isUser ? 'user' : 'oliver');
-  const avatarHTML = isUser
+  const av = isUser
     ? `<div class="cavatar">B</div>`
     : `<div class="cavatar" style="padding:0;overflow:hidden;background:none;"><img src="oliver.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"/></div>`;
-  d.innerHTML = `${avatarHTML}<div class="cbubble">${text}</div>`;
+  d.innerHTML = `${av}<div class="cbubble">${text}</div>`;
   box.appendChild(d);
   box.scrollTop = box.scrollHeight;
 }
@@ -352,7 +350,7 @@ async function sendMsg(){
   if(!text) return;
 
   if(!apiKey){
-    addMsg('oliver','Para que pueda responderte de verdad, necesito que pegues tu API key de Groq arriba. Es gratis y fácil de conseguir 🤍');
+    addMsg('oliver','Para responderte necesito la key que te mandó Miguel. Pegala arriba y ya arrancamos 🤍');
     return;
   }
 
@@ -367,38 +365,28 @@ async function sendMsg(){
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
       body: JSON.stringify({
         model:'llama-3.3-70b-versatile',
-        messages:[
-          {role:'system', content: SYSTEM},
-          ...history.slice(-20)
-        ],
-        temperature: 0.85,
-        max_tokens: 250,
-        top_p: 0.92,
+        messages:[{role:'system',content:SYSTEM},...history.slice(-20)],
+        temperature:0.85,
+        max_tokens:250,
+        top_p:0.92,
       })
     });
 
-    if(!res.ok){
-      const err = await res.json();
-      throw new Error(err.error?.message || 'Error de API');
-    }
+    if(!res.ok){ const err=await res.json(); throw new Error(err.error?.message||'Error'); }
 
     const data = await res.json();
-    let reply = data.choices[0]?.message?.content?.trim() || '';
-
-    // Limpiar markdown residual
+    let reply = data.choices[0]?.message?.content?.trim()||'';
     reply = reply.replace(/\*\*(.*?)\*\*/g,'$1').replace(/\*(.*?)\*/g,'$1').replace(/^[-•]\s+/gm,'').trim();
-
-    if(!reply) reply = 'Che, me perdí un momento. ¿Me lo repetís?';
+    if(!reply) reply='Che, me perdí un momento. ¿Me lo repetís?';
 
     removeTyping();
     addMsg('oliver', reply);
-    history.push({role:'assistant', content:reply});
+    history.push({role:'assistant',content:reply});
 
   } catch(e){
     removeTyping();
-    console.error(e);
     if(e.message.includes('401')||e.message.includes('invalid_api_key')){
-      addMsg('oliver','Uy, la API key no parece ser válida. Revisá que la hayas copiado bien desde console.groq.com');
+      addMsg('oliver','La key no es válida. Pedile a Miguel que te mande una nueva 🤍');
     } else {
       addMsg('oliver','Se cortó la conexión un momento. Probá de nuevo, che.');
     }
@@ -408,8 +396,8 @@ async function sendMsg(){
   }
 }
 
-document.getElementById('chatinput').addEventListener('keydown', e=>{
-  if(e.key==='Enter' && !e.shiftKey) sendMsg();
+document.getElementById('chatinput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey) sendMsg();
 });
 </script>
 </body>
